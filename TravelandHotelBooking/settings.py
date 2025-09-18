@@ -9,7 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-df*&(=0zo*^h3r@5i7e9*e8w35%+yapf2k6hqnlu2+((hh^!f0'
+SECRET_KEY = 'django-insecure-df*&(=0zo*^h3r@5i7e9'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -116,14 +116,14 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DEFAULT_AUTO_FIELD = 'django.dbField'
 
 
-RAZORPAY_KEY_ID = "rzp_test_tPhc333asPKtv6"
-RAZORPAY_KEY_SECRET = "UVSxUflxDlLM9dgEHGBxVok2"
+RAZORPAY_KEY_ID = "rzp_test_tPhctv6"
+RAZORPAY_KEY_SECRET = "UVSxUflxVok2"
 
 
-GEMINI_API_KEY = "AIzaSyC6gOxwWLT2froUzKBgilY0nJEEuV2gCqA" 
+GEMINI_API_KEY = "AIzaSyC6gOxwWLT" 
 
 # class ApiConstants {
 #   static const String apiKey = 'AIzaSyC6gOxwWLT2froUzKBgilY0nJEEuV2gCqA';
