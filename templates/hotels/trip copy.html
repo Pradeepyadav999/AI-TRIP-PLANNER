@@ -1,0 +1,738 @@
+
+{% extends 'hotels/base.html' %}
+
+
+
+{% block content %}
+
+
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        /* .container {
+            max-width: 800px;
+        } */
+        
+        .header {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            padding: 20px 0;
+            border-radius: 0 0 15px 15px;
+            margin-bottom: 30px;
+        }
+        
+        .step-container {
+            display: none;
+            margin-top: 20px;
+            animation: fadeIn 0.5s;
+        }
+        
+        #welcome-container {
+            display: block;
+        }
+        
+        .card {
+            border: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            border: none;
+            padding: 10px 20px;
+            font-weight: 600;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #5a0fcb 0%, #1565fc 100%);
+        }
+        
+        .option-card {
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid #e9ecef;
+        }
+        
+        .option-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+            border-color: #6a11cb;
+        }
+        
+        .option-card.selected {
+            border-color: #6a11cb;
+            background-color: #f0e6ff;
+        }
+        
+        .activity-option {
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            transition: all 0.2s;
+            border: 1px solid #e9ecef;
+        }
+        
+        .activity-option:hover {
+            background-color: #f0e6ff;
+        }
+        
+        .activity-option.selected {
+            background-color: #6a11cb;
+            color: white;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        #trip-result {
+            background-color: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .date-inputs {
+            display: flex;
+            gap: 15px;
+        }
+        
+        @media (max-width: 576px) {
+            .date-inputs {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header text-center">
+        <h1>My Trip</h1>
+        <p class="lead">Plan your perfect getaway with AI assistance</p>
+    </div>
+
+    <div class="container" style=" max-width: 800px;">
+        <!-- Welcome Screen -->
+        <div id="welcome-container" class="step-container">
+            <div class="card text-center">
+                <h2>Welcome to My Trip Planner</h2>
+                <p class="lead">Let's create your personalized travel itinerary with AI</p>
+                <img src="https://img.freepik.com/free-vector/gradient-world-tourism-day-illustration_52683-129641.jpg?semt=ais_hybrid" alt="Travel illustration" class="img-fluid rounded mb-4">
+                <button id="plan-trip-btn" class="btn btn-primary btn-lg">Plan Trip with AI</button>
+            </div>
+        </div>
+
+        <!-- Step 1: Choose Destination -->
+        <div id="destination-container" class="step-container">
+            <div class="card">
+                <h2 class="mb-4">Where do you want to go?</h2>
+                <div class="input-group mb-3">
+                    <input type="text" id="destination-input" class="form-control form-control-lg" placeholder="Search for a destination...">
+                    <button class="btn btn-primary" type="button" id="destination-search-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+                        </svg>
+                    </button>
+                </div>
+                <div id="destination-results" class="row g-3 mt-2">
+                    <!-- Destination options will appear here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 2: Choose Dates -->
+        <div id="dates-container" class="step-container">
+            <div class="card">
+                <h2 class="mb-4">When do you want to go?</h2>
+                <div class="date-inputs mb-4">
+                    <div class="flex-grow-1">
+                        <label for="start-date" class="form-label">Start Date</label>
+                        <input type="date" id="start-date" class="form-control form-control-lg">
+                    </div>
+                    <div class="flex-grow-1">
+                        <label for="end-date" class="form-label">End Date</label>
+                        <input type="date" id="end-date" class="form-control form-control-lg">
+                    </div>
+                </div>
+                <button id="dates-next-btn" class="btn btn-primary">Next</button>
+            </div>
+        </div>
+
+        <!-- Step 3: Travel Companions -->
+        <div id="companions-container" class="step-container">
+            <div class="card">
+                <h2 class="mb-4">Who's coming with you?</h2>
+                <div class="row g-3">
+                    <div class="col-md-6 col-lg-3">
+                        <div class="card option-card text-center p-3" data-companion="solo">
+                            <div class="mb-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" class="bi bi-person" viewBox="0 0 16 16">
+                                    <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/>
+                                </svg>
+                            </div>
+                            <h5>Going Solo</h5>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="card option-card text-center p-3" data-companion="partner">
+                            <div class="mb-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" class="bi bi-people" viewBox="0 0 16 16">
+                                    <path d="M15 14s1 0 1-1-1-4-5-4-5 3-5 4 1 1 1 1h8zm-7.978-1A.261.261 0 0 1 7 12.996c.001-.264.167-1.03.76-1.72C8.312 10.629 9.282 10 11 10c1.717 0 2.687.63 3.24 1.276.593.69.758 1.457.76 1.72l-.008.002a.274.274 0 0 1-.014.002H7.022zM11 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm3-2a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM6.936 9.28a5.88 5.88 0 0 0-1.23-.247A7.35 7.35 0 0 0 5 9c-4 0-5 3-5 4 0 .667.333 1 1 1h4.216A2.238 2.238 0 0 1 5 13c0-1.01.377-2.042 1.09-2.904.243-.294.526-.569.846-.816zM4.92 10A5.493 5.493 0 0 0 4 13H1c0-.26.164-1.03.76-1.724.545-.636 1.492-1.256 3.16-1.275zM1.5 5.5a3 3 0 1 1 6 0 3 3 0 0 1-6 0zm3-2a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/>
+                                </svg>
+                            </div>
+                            <h5>Partner</h5>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="card option-card text-center p-3" data-companion="friends">
+                            <div class="mb-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" class="bi bi-people-fill" viewBox="0 0 16 16">
+                                    <path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1H7zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+                                    <path fill-rule="evenodd" d="M5.216 14A2.238 2.238 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.325 6.325 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1h4.216z"/>
+                                    <path d="M4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/>
+                                </svg>
+                            </div>
+                            <h5>Friends</h5>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="card option-card text-center p-3" data-companion="family">
+                            <div class="mb-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" class="bi bi-house-heart" viewBox="0 0 16 16">
+                                    <path d="M8 6.982C9.664 5.309 13.825 8.236 8 12 2.175 8.236 6.336 5.309 8 6.982Z"/>
+                                    <path d="M8.707 1.5a1 1 0 0 0-1.414 0L.646 8.146a.5.5 0 0 0 .708.707L2 8.207V13.5A1.5 1.5 0 0 0 3.5 15h9a1.5 1.5 0 0 0 1.5-1.5V8.207l.646.646a.5.5 0 0 0 .708-.707L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293L8.707 1.5ZM13 7.207V13.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V7.207l5-5 5 5Z"/>
+                                </svg>
+                            </div>
+                            <h5>Family</h5>
+                        </div>
+                    </div>
+                </div>
+                <button id="companions-next-btn" class="btn btn-primary mt-4">Next</button>
+            </div>
+        </div>
+
+       <!-- Step 4: Activities -->
+<div id="activities-container" class="step-container">
+    <div class="card">
+        <h2 class="mb-4">How do you want to spend your time?</h2>
+        <p class="text-muted mb-3">Select all that apply</p>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="activity-option" data-activity="beaches">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-umbrella-beach me-2" viewBox="0 0 16 16">
+                        <path d="M8 13a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 1 0v1a.5.5 0 0 1-.5.5Z"/>
+                        <path d="M6.5 15a.5.5 0 1 1 0-1h3a.5.5 0 1 1 0 1h-3ZM8 7a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"/>
+                        <path d="M6.928 9.12a.5.5 0 0 0 .258-.449l-.45-6.721A2 2 0 0 1 8.688 0H11.5c2.136 0 3.368 1.68 3.369 3.215 0 1.878-1.165 4.534-2.388 5.892a3.5 3.5 0 0 1-4.57.517 8.2 8.2 0 0 0-.566-.308A1.5 1.5 0 0 1 6.928 9.12zM11.5 1c-1.307 0-2.492.756-2.957 1.936a.5.5 0 0 1-.346.343.5.5 0 0 0-.313.465v6.594a.5.5 0 0 1-.21.409 5.77 5.77 0 0 0-.668.386 2.5 2.5 0 0 0 3.253-.369C11.23 9.898 12.5 7.001 12.5 5c0-1.823-1.359-3-2.5-3z"/>
+                    </svg>
+                    Beaches & Relaxation
+                </div>
+                <div class="activity-option" data-activity="hiking">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-signpost-2 me-2" viewBox="0 0 16 16">
+                        <path d="M7 1.414V2H2a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h5v1H2.5a1 1 0 0 0-.8.4L.725 8.7a.5.5 0 0 0 0 .6l.975 1.3a1 1 0 0 0 .8.4H7v5h2v-5h5a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1H9V6h4.5a1 1 0 0 0 .8-.4l.975-1.3a.5.5 0 0 0 0-.6L14.3 2.4a1 1 0 0 0-.8-.4H9v-.586a1 1 0 0 0-2 0zM13.5 3l.75 1-.75.5H2.5l-.75-1 .75-.5h11zM2.5 8l-.75-1 .75-.5h11l.75 1-.75.5h-11z"/>
+                    </svg>
+                    Hiking & Nature
+                </div>
+                <div class="activity-option" data-activity="culture">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-bank me-2" viewBox="0 0 16 16">
+                        <path d="m8 0 6.61 3h.89a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.5.5H15v7a.5.5 0 0 1 .485.38l.5 2a.498.498 0 0 1-.485.62H.5a.498.498 0 0 1-.485-.62l.5-2A.501.501 0 0 1 1 13V6H.5a.5.5 0 0 1-.5-.5v-2A.5.5 0 0 1 .5 3h.89L8 0ZM3.777 3h8.447L8 1 3.777 3ZM2 6v7h1V6H2Zm2 0v7h2.5V6H4Zm3.5 0v7h1V6h-1Zm2 0v7H12V6H9.5ZM13 6v7h1V6h-1Zm2-1V4H1v1h14Zm-.39 9H1.39l-.25 1h13.72l-.25-1Z"/>
+                    </svg>
+                    Culture & History
+                </div>
+                <div class="activity-option" data-activity="food">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-cup-hot me-2" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M.5 6a.5.5 0 0 0-.488.608l1.652 7.434A2.5 2.5 0 0 0 4.104 16h5.792a2.5 2.5 0 0 0 2.44-1.958l.131-.59a3 3 0 0 0 1.3-5.854l.221-.99A.5.5 0 0 0 13.5 6H.5ZM13 12.5a2.01 2.01 0 0 1-.316-.025l.867-3.898A2.001 2.001 0 0 1 13 12.5ZM2.64 13.825 1.123 7h11.754l-1.517 6.825A1.5 1.5 0 0 1 9.896 15H4.104a1.5 1.5 0 0 1-1.464-1.175Z"/>
+                        <path d="m4.4.8-.003.004-.014.019a4.167 4.167 0 0 0-.204.31 2.327 2.327 0 0 0-.141.267c-.026.06-.034.092-.037.103v.004a.593.593 0 0 0 .091.248c.075.133.178.272.308.445l.01.012c.118.158.26.347.37.543.112.2.22.455.22.745 0 .188-.065.368-.119.494a3.31 3.31 0 0 1-.202.388 5.444 5.444 0 0 1-.253.382l-.018.025-.005.008-.002.002A.5.5 0 0 1 3.6 4.2l.003-.004.014-.019a4.149 4.149 0 0 0 .204-.31 2.06 2.06 0 0 0 .141-.267c.026-.06.034-.092.037-.103a.593.593 0 0 0-.09-.252A4.334 4.334 0 0 0 3.6 2.8l-.01-.012a5.099 5.099 0 0 1-.37-.543A1.53 1.53 0 0 1 3 1.5c0-.188.065-.368.119-.494.059-.138.134-.274.202-.388a5.446 5.446 0 0 1 .253-.382l.018-.025.005-.008.002-.002A.5.5 0 0 1 4.4.8Zm3 0-.003.004-.014.019a4.167 4.167 0 0 0-.204.31 2.327 2.327 0 0 0-.141.267c-.026.06-.034.092-.037.103v.004a.593.593 0 0 0 .091.248c.075.133.178.272.308.445l.01.012c.118.158.26.347.37.543.112.2.22.455.22.745 0 .188-.065.368-.119.494a3.31 3.31 0 0 1-.202.388 5.444 5.444 0 0 1-.253.382l-.018.025-.005.008-.002.002A.5.5 0 0 1 6.6 4.2l.003-.004.014-.019a4.149 4.149 0 0 0 .204-.31 2.06 2.06 0 0 0 .141-.267c.026-.06.034-.092.037-.103a.593.593 0 0 0-.09-.252A4.334 4.334 0 0 0 6.6 2.8l-.01-.012a5.099 5.099 0 0 1-.37-.543A1.53 1.53 0 0 1 6 1.5c0-.188.065-.368.119-.494.059-.138.134-.274.202-.388a5.446 5.446 0 0 1 .253-.382l.018-.025.005-.008.002-.002A.5.5 0 0 1 7.4.8Z"/>
+                    </svg>
+                    Food & Dining
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="activity-option" data-activity="adventure">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-compass me-2" viewBox="0 0 16 16">
+                        <path d="M8 16.016a7.5 7.5 0 0 0 1.962-14.74A1 1 0 0 0 9 0H7a1 1 0 0 0-.962 1.276A7.5 7.5 0 0 0 8 16.016zm6.5-7.5a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0z"/>
+                        <path d="m6.94 7.44 4.95-2.83-2.83 4.95-4.949 2.83 2.828-4.95z"/>
+                    </svg>
+                    Adventure & Sports
+                </div>
+                <div class="activity-option" data-activity="nightlife">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-music-note-beamed me-2" viewBox="0 0 16 16">
+                        <path d="M6 13c0 1.105-1.12 2-2.5 2S1 14.105 1 13c0-1.104 1.12-2 2.5-2s2.5.896 2.5 2zm9-2c0 1.105-1.12 2-2.5 2s-2.5-.895-2.5-2 1.12-2 2.5-2 2.5.895 2.5 2z"/>
+                        <path fill-rule="evenodd" d="M14 11V2h1v9h-1zM6 3v10H5V3h1z"/>
+                        <path d="M5 2.905a1 1 0 0 1 .9-.995l8-.8a1 1 0 0 1 1.1.995V3L5 4V2.905z"/>
+                    </svg>
+                    Nightlife & Entertainment
+                </div>
+                <div class="activity-option" data-activity="shopping">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-bag me-2" viewBox="0 0 16 16">
+                        <path d="M8 1a2.5 2.5 0 0 1 2.5 2.5V4h-5v-.5A2.5 2.5 0 0 1 8 1zm3.5 3v-.5a3.5 3.5 0 1 0-7 0V4H1v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4h-3.5zM2 5h12v9a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V5z"/>
+                    </svg>
+                    Shopping & Markets
+                </div>
+                <div class="activity-option" data-activity="wellness">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-flower1 me-2" viewBox="0 0 16 16">
+                        <path d="M6.174 1.184a2 2 0 0 1 3.652 0A2 2 0 0 1 12.99 3.01a2 2 0 0 1 1.826 3.164 2 2 0 0 1 0 3.652 2 2 0 0 1-1.826 3.164 2 2 0 0 1-3.164 1.826 2 2 0 0 1-3.652 0A2 2 0 0 1 3.01 12.99a2 2 0 0 1-1.826-3.164 2 2 0 0 1 0-3.652A2 2 0 0 1 3.01 3.01a2 2 0 0 1 3.164-1.826zM8 1a1 1 0 0 0-.998 1.03l.01.091c.012.077.029.176.054.296.049.241.122.542.213.887.182.688.428 1.513.676 2.314L8 5.762l.045-.144c.248-.8.494-1.626.676-2.314.091-.345.164-.646.213-.887a4.997 4.997 0 0 0 .064-.386L9 2a1 1 0 0 0-1-1zM2 9l.03-.002.091-.01a4.99 4.99 0 0 0 .296-.054c.241-.049.542-.122.887-.213a60.59 60.59 0 0 0 2.314-.676L5.762 8l-.144-.045a60.59 60.59 0 0 0-2.314-.676 16.705 16.705 0 0 0-.887-.213 4.99 4.99 0 0 0-.386-.064L2 7a1 1 0 1 0 0 2zm7 5-.002-.03a5.005 5.005 0 0 0-.064-.386 16.398 16.398 0 0 0-.213-.888 60.582 60.582 0 0 0-.676-2.314L8 10.238l-.045.144c-.248.8-.494 1.626-.676 2.314-.091.345-.164.646-.213.887a4.996 4.996 0 0 0-.064.386L7 14a1 1 0 1 0 2 0zm-5.696-2.134.025-.017a5.001 5.001 0 0 0 .303-.248c.184-.164.408-.377.661-.629A60.614 60.614 0 0 0 5.96 9.23l.103-.111-.147.033a60.88 60.88 0 0 0-2.343.572c-.344.093-.64.18-.874.258a5.063 5.063 0 0 0-.367.138l-.027.014a1 1 0 1 0 1 1.732zM4.5 14.062a1 1 0 0 0 1.366-.366l.014-.027c.01-.02.021-.048.036-.084a5.09 5.09 0 0 0 .102-.283c.078-.233.165-.53.258-.874a60.6 60.6 0 0 0 .572-2.343l.033-.147-.11.102a60.848 60.848 0 0 0-1.743 1.667 17.07 17.07 0 0 0-.629.66 5.06 5.06 0 0 0-.248.304l-.017.025a1 1 0 0 0 .366 1.366zm9.196-8.196a1 1 0 0 0-1-1.732l-.025.017a4.951 4.951 0 0 0-.303.248 16.69 16.69 0 0 0-.661.629A60.72 60.72 0 0 0 10.04 6.77l-.102.111.147-.033a60.6 60.6 0 0 0 2.342-.572c.345-.093.642-.18.875-.258a4.993 4.993 0 0 0 .367-.138.53.53 0 0 0 .027-.014zM11.5 1.938a1 1 0 0 0-1.366.366l-.014.027c-.01.02-.021.048-.036.084a5.09 5.09 0 0 0-.102.283c-.078.233-.165.53-.258.875a60.62 60.62 0 0 0-.572 2.342l-.033.147.11-.102a60.848 60.848 0 0 0 1.743-1.667c.252-.253.465-.477.629-.66a5.001 5.001 0 0 0 .248-.304l.017-.025a1 1 0 0 0-.366-1.366zM14 9a1 1 0 0 0-1-1l-.03.002a4.996 4.996 0 0 0-.386.064c-.242.049-.543.122-.888.213-.688.182-1.513.428-2.314.676L9.238 9l.144.045c.8.248 1.626.494 2.314.676.345.091.646.164.887.213a4.996 4.996 0 0 0 .386.064L14 10a1 1 0 0 0 0-2zM1.938 4.5a1 1 0 0 0 .393 1.38l.084.035c.072.03.166.064.283.103.233.078.53.165.874.258a60.88 60.88 0 0 0 2.343.572l.147.033-.103-.111a60.584 60.584 0 0 0-1.666-1.742 16.705 16.705 0 0 0-.66-.629 4.996 4.996 0 0 0-.304-.248l-.025-.017a1 1 0 0 0-1.366.366zm2.196-1.196.017.025a4.996 4.996 0 0 0 .248.303c.164.184.377.408.629.661A60.597 60.597 0 0 0 6.77 5.96l.111.102-.033-.147a60.602 60.602 0 0 0-.572-2.342c-.093-.345-.18-.642-.258-.875a5.006 5.006 0 0 0-.138-.367l-.014-.027a1 1 0 1 0-1.732 1zM14.5 3a1 1 0 0 0-1.391-.87l-.027.014c-.02.01-.048.021-.084.036a5.09 5.09 0 0 0-.283.102c-.233.078-.53.165-.874.258a60.56 60.56 0 0 0-2.343.572l-.147.033.102-.11a60.597 60.597 0 0 0 1.667-1.742c.253-.252.477-.465.66-.629a4.996 4.996 0 0 0 .304-.248l.017-.025a1 1 0 0 0-.366-1.366zM12.062 11.5a1 1 0 0 0-1.366.366l-.025.017a4.946 4.946 0 0 0-.303.248 16.69 16.69 0 0 0-.661.629A60.462 60.462 0 0 0 8.04 14.403l-.111.102.033-.147a60.6 60.6 0 0 0 .572-2.342c.093-.345.18-.642.258-.875a5.006 5.006 0 0 0 .138-.367.575.575 0 0 0 .014-.027 1 1 0 0 0-.366-1.366zM1 13.5a1 1 0 0 0 1.366.366l.025-.017a4.946 4.946 0 0 0 .303-.248c.184-.164.408-.377.661-.629a60.76 60.76 0 0 0 1.743-1.667l.102-.111-.147.033a60.623 60.623 0 0 0-2.342.572c-.345.093-.642.18-.875.258a4.993 4.993 0 0 0-.367.138.575.575 0 0 0-.027.014A1 1 0 0 0 1 13.5z"/>
+                    </svg>
+                    Wellness & Spa
+                </div>
+                </div>
+                </div>
+                <button id="activities-next-btn" class="btn btn-primary mt-4">Create Trip</button>
+                </div>
+                </div>
+                
+                <!-- Trip Result -->
+                <div id="trip-result-container" class="step-container">
+                    <div class="card">
+                        <h2 class="mb-4">Your Personalized Trip</h2>
+                        <div id="trip-result" class="p-4">
+                            <!-- Trip result will be displayed here -->
+                        </div>
+                        <div class="text-center mt-4">
+                            <button id="plan-again-btn" class="btn btn-outline-primary">Plan Another Trip</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+                <script>
+                    // Sample destinations data
+                    const destinations = [
+                        { id: 'paris', name: 'Paris, France', image: 'https://dynamic-media-cdn.tripadvisor.com/media/photo-o/1b/4b/59/86/caption.jpg?w=1400&h=1400&s=1', description: 'The City of Light' },
+                        { id: 'tokyo', name: 'Tokyo, Japan', image: 'https://images.squarespace-cdn.com/content/v1/607d95468ee6257ceab9d30a/1722287736963-UXQW0JR5P1LTBEADCW8S/Tokyo+Tower.jpg', description: 'Modern meets traditional' },
+                        { id: 'bali', name: 'Bali, Indonesia', image: 'https://baliuntold.com/wp-content/uploads/2023/11/Em-K-Ubud-Palace.jpg', description: 'Island paradise' },
+                        { id: 'newyork', name: 'New York City, USA', image: 'https://pfnyc.org/wp-content/uploads/2023/11/nick-fewings-2yfWE3yWipQ-unsplash.jpg', description: 'The Big Apple' },
+                        { id: 'rome', name: 'Rome, Italy', image: 'https://i.natgeofe.com/n/3012ffcc-7361-45f6-98b3-a36d4153f660/colosseum-daylight-rome-italy_2x3.jpg', description: 'Eternal City' },
+                        { id: 'sydney', name: 'Sydney, Australia', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Sydney-collage-wikipedia_2.jpg/640px-Sydney-collage-wikipedia_2.jpg', description: 'Harbor city' }
+                    ];
+                
+                    // Trip planning data storage
+                    const tripData = {
+                        destination: null,
+                        startDate: null,
+                        endDate: null,
+                        companions: null,
+                        activities: []
+                    };
+                
+                    // DOM elements
+                    const planTripBtn = document.getElementById('plan-trip-btn');
+                    const destinationInput = document.getElementById('destination-input');
+                    const destinationSearchBtn = document.getElementById('destination-search-btn');
+                    const destinationResults = document.getElementById('destination-results');
+                    const startDateInput = document.getElementById('start-date');
+                    const endDateInput = document.getElementById('end-date');
+                    const datesNextBtn = document.getElementById('dates-next-btn');
+                    const companionsNextBtn = document.getElementById('companions-next-btn');
+                    const activitiesNextBtn = document.getElementById('activities-next-btn');
+                    const planAgainBtn = document.getElementById('plan-again-btn');
+                
+                    // Step navigation
+                    function showStep(stepId) {
+                        // Hide all steps
+                        document.querySelectorAll('.step-container').forEach(container => {
+                            container.style.display = 'none';
+                        });
+                        
+                        // Show the requested step
+                        document.getElementById(stepId).style.display = 'block';
+                        
+                        // Scroll to top
+                        window.scrollTo(0, 0);
+                    }
+                
+                    // Initialize event listeners
+                    function initEventListeners() {
+                        // Plan Trip button
+                        planTripBtn.addEventListener('click', () => {
+                            showStep('destination-container');
+                        });
+                
+                        // Destination search
+                        destinationSearchBtn.addEventListener('click', searchDestinations);
+                        destinationInput.addEventListener('keyup', (e) => {
+                            if (e.key === 'Enter') {
+                                searchDestinations();
+                            }
+                        });
+                
+                        // Dates next button
+                        datesNextBtn.addEventListener('click', () => {
+                            const startDate = startDateInput.value;
+                            const endDate = endDateInput.value;
+                            
+                            if (!startDate || !endDate) {
+                                alert('Please select both start and end dates');
+                                return;
+                            }
+                            
+                            if (new Date(startDate) > new Date(endDate)) {
+                                alert('End date must be after start date');
+                                return;
+                            }
+                            
+                            tripData.startDate = startDate;
+                            tripData.endDate = endDate;
+                            showStep('companions-container');
+                        });
+                
+                        // Companion selection
+                        document.querySelectorAll('.option-card').forEach(card => {
+                            card.addEventListener('click', () => {
+                                // Remove selected class from all cards
+                                document.querySelectorAll('.option-card').forEach(c => {
+                                    c.classList.remove('selected');
+                                });
+                                
+                                // Add selected class to clicked card
+                                card.classList.add('selected');
+                                
+                                // Save selected companion
+                                tripData.companions = card.getAttribute('data-companion');
+                                
+                                // Enable next button
+                                companionsNextBtn.disabled = false;
+                            });
+                        });
+                
+                        // Companions next button
+                        companionsNextBtn.addEventListener('click', () => {
+                            if (!tripData.companions) {
+                                alert('Please select who you are traveling with');
+                                return;
+                            }
+                            
+                            showStep('activities-container');
+                        });
+                
+                        // Activity selection
+                        document.querySelectorAll('.activity-option').forEach(option => {
+                            option.addEventListener('click', () => {
+                                option.classList.toggle('selected');
+                                
+                                const activity = option.getAttribute('data-activity');
+                                
+                                if (option.classList.contains('selected')) {
+                                    if (!tripData.activities.includes(activity)) {
+                                        tripData.activities.push(activity);
+                                    }
+                                } else {
+                                    const index = tripData.activities.indexOf(activity);
+                                    if (index > -1) {
+                                        tripData.activities.splice(index, 1);
+                                    }
+                                }
+                            });
+                        });
+                
+                        // Activities next button
+                        activitiesNextBtn.addEventListener('click', () => {
+                            if (tripData.activities.length === 0) {
+                                alert('Please select at least one activity');
+                                return;
+                            }
+                            
+                            generateTrip();
+                            showStep('trip-result-container');
+                        });
+                
+                        // Plan again button
+                        planAgainBtn.addEventListener('click', () => {
+                            // Reset form
+                            resetTripData();
+                            showStep('welcome-container');
+                        });
+                    }
+                
+                    // Search destinations
+                    function searchDestinations() {
+                        const searchTerm = destinationInput.value.toLowerCase().trim();
+                        
+                        if (!searchTerm) {
+                            alert('Please enter a destination');
+                            return;
+                        }
+                        
+                        const filteredDestinations = destinations.filter(dest => 
+                            dest.name.toLowerCase().includes(searchTerm)
+                        );
+                        
+                        renderDestinationResults(filteredDestinations);
+    }
+
+    // Render destination search results
+    function renderDestinationResults(results) {
+        destinationResults.innerHTML = '';
+        
+        if (results.length === 0) {
+            destinationResults.innerHTML = `
+                <div class="col-12 text-center py-4">
+                    <p>No destinations found. Try another search term.</p>
+                </div>
+            `;
+            return;
+        }
+        
+        results.forEach(dest => {
+            const destElement = document.createElement('div');
+            destElement.className = 'col-md-6 mb-3';
+            destElement.innerHTML = `
+                <div class="card h-100 option-card" data-destination="${dest.id}">
+                    <div class="row g-0">
+                        <div class="col-4">
+                            <img src="${dest.image}" class="img-fluid rounded-start" alt="${dest.name}">
+                        </div>
+                        <div class="col-8">
+                            <div class="card-body">
+                                <h5 class="card-title">${dest.name}</h5>
+                                <p class="card-text small">${dest.description}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            destElement.querySelector('.card').addEventListener('click', () => {
+                tripData.destination = dest;
+                showStep('dates-container');
+            });
+            
+            destinationResults.appendChild(destElement);
+        });
+    }
+
+    // Generate trip
+    function generateTrip() {
+        const tripResultElement = document.getElementById('trip-result');
+        
+        // Format dates
+        const formattedStartDate = new Date(tripData.startDate).toLocaleDateString('en-US', { 
+            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+        });
+        const formattedEndDate = new Date(tripData.endDate).toLocaleDateString('en-US', { 
+            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+        });
+        
+        // Calculate duration
+        const startDate = new Date(tripData.startDate);
+        const endDate = new Date(tripData.endDate);
+        const duration = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+        
+        // Format companions
+        let companionsText = '';
+        switch(tripData.companions) {
+            case 'solo':
+                companionsText = 'Solo Adventure';
+                break;
+            case 'partner':
+                companionsText = 'Romantic Getaway';
+                break;
+            case 'friends':
+                companionsText = 'Friends Trip';
+                break;
+            case 'family':
+                companionsText = 'Family Vacation';
+                break;
+        }
+        
+        // Format activities
+        const activityMap = {
+            'beaches': 'Beaches & Relaxation',
+            'hiking': 'Hiking & Nature',
+            'culture': 'Culture & History',
+            'food': 'Food & Dining',
+            'adventure': 'Adventure & Sports',
+            'nightlife': 'Nightlife & Entertainment',
+            'shopping': 'Shopping & Markets',
+            'wellness': 'Wellness & Spa'
+        };
+        
+        const formattedActivities = tripData.activities.map(act => activityMap[act] || act);
+        
+        // Generate recommendations based on selected activities
+        const recommendations = generateRecommendations();
+        
+        tripResultElement.innerHTML = `
+            <div class="mb-4">
+                <div class="d-flex align-items-center mb-3">
+                    <h3 class="mb-0">${tripData.destination.name}</h3>
+                    <span class="badge bg-primary ms-2">${companionsText}</span>
+                </div>
+                <p class="mb-1"><strong>When:</strong> ${formattedStartDate} to ${formattedEndDate} (${duration} days)</p>
+                <p><strong>Interests:</strong> ${formattedActivities.join(', ')}</p>
+            </div>
+            
+            <div class="mb-4">
+                <h4>Your Personalized Trip Plan</h4>
+                <div class="alert alert-info">
+                    We've created a custom ${duration}-day itinerary for your trip to ${tripData.destination.name} 
+                    focusing on ${formattedActivities.slice(0, 2).join(' and ')}.
+                </div>
+            </div>
+            
+            <div class="mb-4">
+                <h5>Recommendations</h5>
+                <ul class="list-group">
+                    ${recommendations.map(rec => `
+                        <li class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">${rec.name}</h6>
+                                    <p class="mb-0 small text-muted">${rec.description}</p>
+                                </div>
+                                <span class="badge bg-secondary rounded-pill">${rec.category}</span>
+                            </div>
+                        </li>
+                    `).join('')}
+                </ul>
+            </div>
+            
+            <div class="text-center">
+                <p class="mb-0">
+                    <a href="#" class="btn btn-sm btn-primary">View Full Itinerary</a>
+                    <a href="#" class="btn btn-sm btn-outline-primary">Share Trip</a>
+                </p>
+            </div>
+        `;
+
+        saveTripToLocalStorage();
+    }
+    
+    // Generate recommendations based on selected activities and destination
+    function generateRecommendations() {
+        const destinationRecommendations = {
+            'paris': {
+                'culture': { name: 'Louvre Museum', description: 'World-famous art museum', category: 'Must Visit' },
+                'food': { name: 'Le Marais Food Tour', description: 'Explore local cuisine', category: 'Food' },
+                'shopping': { name: 'Champs-Élysées', description: 'Luxury shopping avenue', category: 'Shopping' },
+                'default': { name: 'Eiffel Tower', description: 'Iconic Paris landmark', category: 'Must Visit' }
+            },
+            'tokyo': {
+                'culture': { name: 'Senso-ji Temple', description: 'Ancient Buddhist temple', category: 'Culture' },
+                'food': { name: 'Tsukiji Outer Market', description: 'Food stalls and restaurants', category: 'Food' },
+                'nightlife': { name: 'Shinjuku Golden Gai', description: 'Narrow alleys with tiny bars', category: 'Nightlife' },
+                'default': { name: 'Tokyo Skytree', description: 'Tallest tower in Japan', category: 'Must Visit' }
+            },
+            'bali': {
+                'beaches': { name: 'Kuta Beach', description: 'Popular surfing destination', category: 'Beach' },
+                'wellness': { name: 'Ubud Yoga Retreat', description: 'Wellness in the jungle', category: 'Wellness' },
+                'hiking': { name: 'Mount Batur Sunrise Trek', description: 'Volcano hiking', category: 'Adventure' },
+                'default': { name: 'Uluwatu Temple', description: 'Clifftop sea temple', category: 'Must Visit' }
+            },
+            'newyork': {
+                'culture': { name: 'Metropolitan Museum of Art', description: 'World-class art collection', category: 'Culture' },
+                'food': { name: 'Chelsea Market', description: 'Food hall with diverse options', category: 'Food' },
+                'shopping': { name: '5th Avenue', description: 'Luxury shopping district', category: 'Shopping' },
+                'default': { name: 'Central Park', description: 'Urban park in Manhattan', category: 'Must Visit' }
+            },
+            'rome': {
+                'culture': { name: 'Colosseum', description: 'Ancient Roman amphitheater', category: 'Must Visit' },
+                'food': { name: 'Trastevere Food Tour', description: 'Traditional Roman cuisine', category: 'Food' },
+                'hiking': { name: 'Appian Way', description: 'Ancient Roman road', category: 'Outdoors' },
+                'default': { name: 'Vatican Museums', description: 'Art and cultural exhibits', category: 'Must Visit' }
+            },
+            'sydney': {
+                'beaches': { name: 'Bondi Beach', description: 'Famous city beach', category: 'Beach' },
+                'adventure': { name: 'Sydney Harbour Bridge Climb', description: 'City views from above', category: 'Adventure' },
+                'food': { name: 'Surry Hills Restaurants', description: 'Trendy dining district', category: 'Food' },
+                'default': { name: 'Sydney Opera House', description: 'Iconic performance venue', category: 'Must Visit' }
+            }
+        };
+        
+        const recommendations = [];
+        
+        // Always add the default recommendation
+        if (tripData.destination && destinationRecommendations[tripData.destination.id]) {
+            recommendations.push(destinationRecommendations[tripData.destination.id].default);
+            
+            // Add activity-specific recommendations
+            tripData.activities.forEach(activity => {
+                if (destinationRecommendations[tripData.destination.id][activity]) {
+                    recommendations.push(destinationRecommendations[tripData.destination.id][activity]);
+                }
+            });
+        } else {
+            // Fallback recommendations
+            recommendations.push(
+                { name: 'Local Tours', description: 'Explore with knowledgeable guides', category: 'Experience' },
+                { name: 'Top-rated Restaurants', description: 'Enjoy local cuisine', category: 'Food' },
+                { name: 'Must-see Attractions', description: 'Don\'t miss these sights', category: 'Sightseeing' }
+            );
+        }
+        
+        // Return only unique recommendations (up to 4)
+        const uniqueRecommendations = recommendations.filter((rec, index, self) => 
+            index === self.findIndex(r => r.name === rec.name)
+        );
+        
+        return uniqueRecommendations.slice(0, 4);
+    }
+
+    // Reset trip data
+    function resetTripData() {
+        tripData.destination = null;
+        tripData.startDate = null;
+        tripData.endDate = null;
+        tripData.companions = null;
+        tripData.activities = [];
+        
+        // Reset form elements
+        destinationInput.value = '';
+        startDateInput.value = '';
+        endDateInput.value = '';
+        
+        document.querySelectorAll('.option-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+        
+        document.querySelectorAll('.activity-option').forEach(option => {
+            option.classList.remove('selected');
+        });
+        
+        destinationResults.innerHTML = '';
+    }
+
+    // Initialize the application
+    function init() {
+         initEventListeners();
+        
+         // Set min date to today for date inputs
+         const today = new Date().toISOString().split('T')[0];
+         startDateInput.min = today;
+         endDateInput.min = today;
+     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // Start the app when DOM is loaded
+    document.addEventListener('DOMContentLoaded', init);
+</script>
+</div>
+
+
+
+
+
+{% endblock %}

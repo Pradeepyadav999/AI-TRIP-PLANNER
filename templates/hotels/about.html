@@ -1,0 +1,90 @@
+{% extends 'hotels/header.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow-lg border-0 rounded-lg" data-aos="fade-up">
+                <div class="card-header bg-primary text-white">
+                    <h1 class="text-center mb-0">About Travel Explorer</h1>
+                </div>
+                <div class="card-body p-5">
+                    <div class="mb-5">
+                        <h2 class="mb-4">Our Story</h2>
+                        <p class="lead">Travel Explorer was founded in 2024 with a simple mission: to make travel planning easier, more affordable, and more enjoyable for everyone.</p>
+                        <p>We believe that travel is one of life's greatest experiences, opening minds, creating connections, and building lasting memories. However, we also understand that planning a trip can be stressful and time-consuming. That's where we come in.</p>
+                    </div>
+                    
+                    <div class="mb-5">
+                        <h2 class="mb-4">What Makes Us Different</h2>
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <div class="d-flex">
+                                    <div class="me-3">
+                                        <i class="fas fa-globe-americas fa-2x text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <h4>Global Destinations</h4>
+                                        <p>We offer accommodations in hundreds of destinations worldwide, from popular tourist spots to hidden gems.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex">
+                                    <div class="me-3">
+                                        <i class="fas fa-robot fa-2x text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <h4>AI-Powered Planning</h4>
+                                        <p>Our AI trip planner creates personalized itineraries based on your preferences and travel style.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex">
+                                    <div class="me-3">
+                                        <i class="fas fa-hand-holding-usd fa-2x text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <h4>Best Price Guarantee</h4>
+                                        <p>We continuously monitor prices to ensure you get the best deals on accommodations.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex">
+                                    <div class="me-3">
+                                        <i class="fas fa-headset fa-2x text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <h4>24/7 Support</h4>
+                                        <p>Our customer support team is available around the clock to assist with any questions or issues.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-5">
+                        <h2 class="mb-4">Our Team</h2>
+                        <p>We're a diverse group of travel enthusiasts, tech experts, and customer service professionals. What unites us is our passion for travel and our commitment to providing exceptional service.</p>
+                        <p>Our team has visited over 50 countries collectively, and we bring this firsthand knowledge to every aspect of our platform.</p>
+                    </div>
+                    
+                    <div>
+                        <h2 class="mb-4">Our Vision</h2>
+                        <p>We envision a world where everyone can experience the joy of travel, regardless of their budget or planning expertise. We're continuously innovating and expanding our services to make this vision a reality.</p>
+                        <p>Thank you for choosing Travel Explorer. We're excited to be part of your journey!</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-5">
+                <a href="{% url 'contact' %}" class="btn btn-primary btn-lg px-5">
+                    <i class="fas fa-envelope me-2"></i>Get in Touch
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

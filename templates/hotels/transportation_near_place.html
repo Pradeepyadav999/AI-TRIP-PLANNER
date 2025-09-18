@@ -1,0 +1,144 @@
+{% extends 'hotels/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <h2 class="mb-4">Transportation Options near {{ place.name }}</h2>
+            
+            <!-- Map Section -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div id="map" style="height: 500px;">
+                        {{ map_html|safe }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transportation Options -->
+            <div class="row">
+                {% for transport in transportation_types %}
+                <div class="col-md-3 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="fa fa-{{ transport.icon_name }} fa-3x mb-3" style="color: {{ transport.icon_color }}"></i>
+                            <h5 class="card-title">{{ transport.name }}</h5>
+                            <div class="mt-3">
+                                <button class="btn btn-outline-primary btn-sm show-nearby" data-type="{{ transport.name|lower }}">
+                                    Show Nearby
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Transportation List -->
+            <div class="mt-4">
+                <div id="transportation-list" class="row">
+                    <!-- Transportation items will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Spinner -->
+<div id="loading-spinner" class="text-center" style="display: none;">
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+</div>
+
+<style>
+    .transportation-item {
+        transition: transform 0.2s;
+    }
+    .transportation-item:hover {
+        transform: translateY(-5px);
+    }
+    .show-nearby {
+        transition: all 0.3s;
+    }
+    .show-nearby:hover {
+        transform: scale(1.05);
+    }
+    #loading-spinner {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1000;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const buttons = document.querySelectorAll('.show-nearby');
+    const transportationList = document.getElementById('transportation-list');
+    const loadingSpinner = document.getElementById('loading-spinner');
+    
+    buttons.forEach(button => {
+        button.addEventListener('click', function() {
+            const type = this.dataset.type;
+            loadingSpinner.style.display = 'block';
+            
+            // Simulate loading transportation options (replace with actual API call)
+            setTimeout(() => {
+                // Example transportation items
+                const items = [
+                    {
+                        name: `${type.charAt(0).toUpperCase() + type.slice(1)} Station 1`,
+                        distance: '0.5 km',
+                        rating: '4.5',
+                        status: 'Open'
+                    },
+                    {
+                        name: `${type.charAt(0).toUpperCase() + type.slice(1)} Station 2`,
+                        distance: '1.2 km',
+                        rating: '4.2',
+                        status: 'Open'
+                    },
+                    {
+                        name: `${type.charAt(0).toUpperCase() + type.slice(1)} Station 3`,
+                        distance: '2.0 km',
+                        rating: '4.0',
+                        status: 'Open'
+                    }
+                ];
+                
+                // Clear previous results
+                transportationList.innerHTML = '';
+                
+                // Add new items
+                items.forEach(item => {
+                    const itemHtml = `
+                        <div class="col-md-4 mb-4">
+                            <div class="card transportation-item h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">${item.name}</h5>
+                                    <p class="card-text">
+                                        <i class="fa fa-map-marker text-danger"></i> ${item.distance}<br>
+                                        <i class="fa fa-star text-warning"></i> ${item.rating}<br>
+                                        <span class="badge bg-success">${item.status}</span>
+                                    </p>
+                                    <a href="https://www.google.com/maps/dir/?api=1&destination={{ place.latitude }},{{ place.longitude }}" 
+                                       target="_blank" class="btn btn-primary btn-sm">
+                                        Get Directions
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    transportationList.innerHTML += itemHtml;
+                });
+                
+                loadingSpinner.style.display = 'none';
+            }, 1000);
+        });
+    });
+});
+</script>
+{% endblock %} 

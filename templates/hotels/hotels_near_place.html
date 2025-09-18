@@ -1,0 +1,190 @@
+
+
+{% extends 'hotels/base.html' %}
+
+
+
+{% block content %}
+<style>
+     /* Custom styles */
+     .navbar {
+        background-color: #3a86ff;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .navbar-brand, .nav-link {
+        color: white !important;
+    }
+    
+    .hero-section {
+        background-color: #f8f9fa;
+        padding: 2rem 0;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .hotel-card {
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s, box-shadow 0.3s;
+        margin-bottom: 1.5rem;
+        background-color: white;
+        height: 100%;
+    }
+    
+    .hotel-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    }
+    
+    .hotel-img {
+        height: 200px;
+        object-fit: cover;
+        width: 100%;
+    }
+    
+    .hotel-price {
+        background-color: #ff5a5f;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-weight: bold;
+    }
+    
+    .hotel-location {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    
+    .hotel-name {
+        color: #212529;
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.3s;
+    }
+    
+    .hotel-name:hover {
+        color: #ff5a5f;
+    }
+    
+    .section-title {
+        position: relative;
+        padding-bottom: 10px;
+        margin-bottom: 30px;
+    }
+    
+    .section-title:after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 50px;
+        height: 3px;
+        background-color: #ff5a5f;
+    }
+    
+    .empty-state {
+        padding: 3rem;
+        text-align: center;
+        background-color: #f8f9fa;
+        border-radius: 10px;
+    }
+    
+    footer {
+        background-color: #3a86ff;
+        color: white;
+        padding: 1.5rem 0;
+        margin-top: 3rem;
+    }
+    
+    .btn-view-details {
+        background-color: #3a86ff;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 5px;
+        transition: all 0.3s;
+    }
+    
+    .btn-view-details:hover {
+        background-color: #2a75e8;
+        transform: translateY(-2px);
+    }
+</style>
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-12 text-center">
+                    <h1 class="display-4 fw-bold mb-3" >Available Hotels</h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb justify-content-center">
+                            <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                            <li class="breadcrumb-item"><a href="#">Destinations</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Hotels</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container py-5">
+        <div class="row">
+            <div class="col-lg-12">
+                <h2 class="section-title" >Find Your Perfect Stay</h2>
+            </div>
+        </div>
+        
+        {% if hotels %}
+        <div class="row g-4">
+            {% for hotel in hotels %}
+            <div class="col-lg-4 col-md-6">
+                <div class="hotel-card">
+                    <img src="{{ hotel.image.url }}" alt="{{ hotel.name }}" class="hotel-img">
+                    <div class="card-body p-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h5 class="card-title mb-0">
+                                <a href="{% url 'hotel_details' hotel.id %}" class="hotel-name">{{ hotel.name }}</a>
+                            </h5>
+                            <span class="hotel-price">₹{{ hotel.price }}</span>
+                        </div>
+                        <p class="hotel-location mb-3">
+                            <i class="fas fa-map-marker-alt me-2"></i>{{ hotel.location }}
+                        </p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="text-warning">
+                                {% if hotel.rating %}
+                                    {% for i in hotel.rating|add:"0"|ljust:"5" %}
+                                        <i class="fas fa-star"></i>
+                                    {% endfor %}
+                                {% else %}
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="far fa-star"></i>
+                                {% endif %}
+                            </div>
+                            <a href="{% url 'hotel_details' hotel.id %}" class="btn btn-primary btn-view-details">
+                                <i class="fas fa-info-circle me-1"></i>View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state" data-aos="fade-up">
+            <i class="fas fa-hotel fa-3x text-muted mb-3"></i>
+            <h3>No Hotels Found</h3>
+            <p class="mb-0">We couldn't find any hotels near this location. Please try a different destination.</p>
+        </div>
+        {% endif %}
+    </div>
+
+
+    {% endblock %}
+
+   

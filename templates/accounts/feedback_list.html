@@ -1,0 +1,432 @@
+{% extends 'hotels/header.html' %}
+
+{% block content %}
+<style>
+    /* Review card styles */
+    .card.hover-shadow {
+        transition: all 0.3s ease;
+    }
+    
+    .card.hover-shadow:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    }
+    
+    /* Rating stars */
+    .fas.fa-star.text-warning {
+        color: #FFD700 !important;
+    }
+    
+    /* Review text */
+    .card-text {
+        line-height: 1.6;
+        color: #444;
+    }
+    
+    /* Category badges */
+    .badge.bg-info {
+        background-color: #0dcaf0 !important;
+        font-size: 0.85rem;
+        padding: 5px 10px;
+    }
+    
+    /* Custom bg colors for status badges */
+    .badge.bg-warning {
+        background-color: #ffc107 !important;
+    }
+    
+    .badge.bg-info {
+        background-color: #0dcaf0 !important;
+    }
+    
+    .badge.bg-success {
+        background-color: #198754 !important;
+    }
+    
+    /* Modal styles */
+    .modal-content {
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    
+    .modal-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #eaeaea;
+    }
+    
+    /* Section headers */
+    .h4 {
+        position: relative;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+    }
+    
+    .h4:after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 50px;
+        height: 3px;
+        background-color: #0d6efd;
+    }
+</style>
+
+<div class="container my-5">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3">Community Reviews</h1>
+                {% if request.user.is_authenticated %}
+                <a href="{% url 'feedback_create' %}" class="btn btn-primary">
+                    <i class="fas fa-plus me-1"></i> New Review
+                </a>
+                {% else %}
+                <a href="{% url 'login' %}" class="btn btn-primary">
+                    <i class="fas fa-sign-in-alt me-1"></i> Login to Submit
+                </a>
+                {% endif %}
+            </div>
+            
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{% if message.tags == 'success' %}success{% else %}danger{% endif %} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+            
+            <!-- All User Feedback Section -->
+            <section class="mb-5">
+                {% if all_feedback %}
+                    <div class="row g-4">
+                        {% for feedback in all_feedback %}
+                            <div class="col-md-6 col-lg-4">
+                                <div class="card h-100 shadow-sm hover-shadow">
+                                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                                        <div class="d-flex align-items-center">
+                                            {% if feedback.user.profile.profile_picture %}
+                                                <img src="{{ feedback.user.profile.profile_picture.url }}" class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit: cover;" alt="{{ feedback.user.username }}">
+                                            {% else %}
+                                                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
+                                                    <i class="fas fa-user"></i>
+                                                </div>
+                                            {% endif %}
+                                            <span class="fw-bold">{{ feedback.user.username }}</span>
+                                        </div>
+                                        <span class="badge bg-info">
+                                            {{ feedback.get_entity_type_display }}
+                                        </span>
+                                    </div>
+                                    
+                                    {% if feedback.photos %}
+                                        <div class="position-relative">
+                                            <img src="{{ feedback.photos.url }}" class="card-img-top" style="height: 180px; object-fit: cover;" alt="Review Photo">
+                                            <div class="position-absolute top-0 end-0 m-2">
+                                                <a href="{{ feedback.photos.url }}" target="_blank" class="btn btn-sm btn-light" title="View full image">
+                                                    <i class="fas fa-expand"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                    
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <div>
+                                                {% for i in "12345" %}
+                                                    {% if forloop.counter <= feedback.rating %}
+                                                        <i class="fas fa-star text-warning"></i>
+                                                    {% else %}
+                                                        <i class="far fa-star text-muted"></i>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </div>
+                                            <small class="text-muted">{{ feedback.created_at|date:"M d, Y" }}</small>
+                                        </div>
+                                        
+                                        {% if feedback.entity_type == 'destination' and feedback.entity_id %}
+                                            <h6 class="card-subtitle mb-2 text-muted">
+                                                <i class="fas fa-map-marker-alt me-1"></i> 
+                                                {% for place in places %}
+                                                    {% if place.id == feedback.entity_id %}
+                                                        <a href="{% url 'place_details' place.id %}" class="text-decoration-none">{{ place.name }}</a>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </h6>
+                                        {% elif feedback.entity_type == 'hotel' and feedback.entity_id %}
+                                            <h6 class="card-subtitle mb-2 text-muted">
+                                                <i class="fas fa-hotel me-1"></i> 
+                                                {% for hotel in hotels %}
+                                                    {% if hotel.id == feedback.entity_id %}
+                                                        <a href="{% url 'hotel_details' hotel.id %}" class="text-decoration-none">{{ hotel.name }}</a>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </h6>
+                                        {% endif %}
+                                        
+                                        <p class="card-text">
+                                            {% if feedback.message|length > 150 %}
+                                                {{ feedback.message|slice:":150" }}...
+                                                <a href="#" class="read-more-link text-primary" data-bs-toggle="modal" data-bs-target="#reviewModal{{ feedback.id }}">Read more</a>
+                                            {% else %}
+                                                {{ feedback.message }}
+                                            {% endif %}
+                                        </p>
+                                        
+                                        {% if request.user.is_authenticated and feedback.user == request.user %}
+                                            <div class="mt-3">
+                                                <a href="{% url 'feedback_detail' feedback.pk %}" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-eye me-1"></i> Details
+                                                </a>
+                                                {% if feedback.status == 'pending' %}
+                                                    <a href="{% url 'feedback_update' feedback.pk %}" class="btn btn-sm btn-outline-secondary">
+                                                        <i class="fas fa-edit me-1"></i> Edit
+                                                    </a>
+                                                    <a href="{% url 'feedback_delete' feedback.pk %}" class="btn btn-sm btn-outline-danger">
+                                                        <i class="fas fa-trash me-1"></i> Delete
+                                                    </a>
+                                                {% endif %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <!-- Modal for full review -->
+                                <div class="modal fade" id="reviewModal{{ feedback.id }}" tabindex="-1" aria-labelledby="reviewModalLabel{{ feedback.id }}" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="reviewModalLabel{{ feedback.id }}">Review by {{ feedback.user.username }}</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                {% if feedback.photos %}
+                                                    <img src="{{ feedback.photos.url }}" class="img-fluid mb-3 rounded" alt="Review Photo">
+                                                {% endif %}
+                                                <div class="mb-3">
+                                                    {% for i in "12345" %}
+                                                        {% if forloop.counter <= feedback.rating %}
+                                                            <i class="fas fa-star text-warning"></i>
+                                                        {% else %}
+                                                            <i class="far fa-star text-muted"></i>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                    <span class="ms-2 text-muted">{{ feedback.created_at|date:"M d, Y" }}</span>
+                                                </div>
+                                                <p>{{ feedback.message }}</p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="card shadow">
+                        <div class="card-body text-center py-5">
+                            <i class="far fa-comment-dots fa-4x text-muted mb-3"></i>
+                            <h4>No Reviews Yet</h4>
+                            <p class="text-muted">Be the first to submit a review!</p>
+                            {% if request.user.is_authenticated %}
+                                <a href="{% url 'feedback_create' %}" class="btn btn-primary mt-2">
+                                    <i class="fas fa-plus me-1"></i> Submit Review
+                                </a>
+                            {% else %}
+                                <a href="{% url 'login' %}" class="btn btn-primary mt-2">
+                                    <i class="fas fa-sign-in-alt me-1"></i> Login to Submit Review
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+            </section>
+            
+            <!-- User's Own Feedback Section - Only visible if logged in -->
+            {% if request.user.is_authenticated %}
+                <section>
+                    <h2 class="h4 mb-3">My Reviews</h2>
+                    {% if user_feedback %}
+                        <div class="row g-4">
+                            {% for feedback in user_feedback %}
+                                <div class="col-md-6 col-lg-4">
+                                    <div class="card h-100 shadow-sm hover-shadow border-primary border-top border-2">
+                                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <span class="badge bg-info">
+                                                    {{ feedback.get_entity_type_display }}
+                                                </span>
+                                            </div>
+                                            <small class="text-muted">{{ feedback.created_at|date:"M d, Y" }}</small>
+                                        </div>
+                                        
+                                        {% if feedback.photos %}
+                                            <div class="position-relative">
+                                                <img src="{{ feedback.photos.url }}" class="card-img-top" style="height: 180px; object-fit: cover;" alt="Review Photo">
+                                                <div class="position-absolute top-0 end-0 m-2">
+                                                    <a href="{{ feedback.photos.url }}" target="_blank" class="btn btn-sm btn-light" title="View full image">
+                                                        <i class="fas fa-expand"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                        
+                                        <div class="card-body">
+                                            <div class="mb-2">
+                                                {% for i in "12345" %}
+                                                    {% if forloop.counter <= feedback.rating %}
+                                                        <i class="fas fa-star text-warning"></i>
+                                                    {% else %}
+                                                        <i class="far fa-star text-muted"></i>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </div>
+                                            
+                                            {% if feedback.entity_type == 'destination' and feedback.entity_id %}
+                                                <h6 class="card-subtitle mb-2 text-muted">
+                                                    <i class="fas fa-map-marker-alt me-1"></i> 
+                                                    {% for place in places %}
+                                                        {% if place.id == feedback.entity_id %}
+                                                            <a href="{% url 'place_details' place.id %}" class="text-decoration-none">{{ place.name }}</a>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </h6>
+                                            {% elif feedback.entity_type == 'hotel' and feedback.entity_id %}
+                                                <h6 class="card-subtitle mb-2 text-muted">
+                                                    <i class="fas fa-hotel me-1"></i> 
+                                                    {% for hotel in hotels %}
+                                                        {% if hotel.id == feedback.entity_id %}
+                                                            <a href="{% url 'hotel_details' hotel.id %}" class="text-decoration-none">{{ hotel.name }}</a>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </h6>
+                                            {% endif %}
+                                            
+                                            <p class="card-text">
+                                                {% if feedback.message|length > 150 %}
+                                                    {{ feedback.message|slice:":150" }}...
+                                                    <a href="#" class="read-more-link text-primary" data-bs-toggle="modal" data-bs-target="#myReviewModal{{ feedback.id }}">Read more</a>
+                                                {% else %}
+                                                    {{ feedback.message }}
+                                                {% endif %}
+                                            </p>
+                                            
+                                            <div class="d-flex justify-content-between mt-3">
+                                                <a href="{% url 'feedback_detail' feedback.pk %}" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-eye me-1"></i> Details
+                                                </a>
+                                                
+                                                <div>
+                                                    {% if feedback.status == 'pending' %}
+                                                        <a href="{% url 'feedback_update' feedback.pk %}" class="btn btn-sm btn-outline-secondary">
+                                                            <i class="fas fa-edit me-1"></i> Edit
+                                                        </a>
+                                                        <a href="{% url 'feedback_delete' feedback.pk %}" class="btn btn-sm btn-outline-danger">
+                                                            <i class="fas fa-trash me-1"></i> Delete
+                                                        </a>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Status badge -->
+                                            <div class="position-absolute top-0 start-0 m-2">
+                                                <span class="badge bg-{% if feedback.status == 'pending' %}warning{% elif feedback.status == 'reviewed' %}info{% else %}success{% endif %}">
+                                                    {{ feedback.status|title }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Modal for full review -->
+                                    <div class="modal fade" id="myReviewModal{{ feedback.id }}" tabindex="-1" aria-labelledby="myReviewModalLabel{{ feedback.id }}" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="myReviewModalLabel{{ feedback.id }}">My Review</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    {% if feedback.photos %}
+                                                        <img src="{{ feedback.photos.url }}" class="img-fluid mb-3 rounded" alt="Review Photo">
+                                                    {% endif %}
+                                                    
+                                                    <div class="d-flex justify-content-between mb-3">
+                                                        <div>
+                                                            {% for i in "12345" %}
+                                                                {% if forloop.counter <= feedback.rating %}
+                                                                    <i class="fas fa-star text-warning"></i>
+                                                                {% else %}
+                                                                    <i class="far fa-star text-muted"></i>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        </div>
+                                                        <span class="text-muted">{{ feedback.created_at|date:"M d, Y" }}</span>
+                                                    </div>
+                                                    
+                                                    <p>{{ feedback.message }}</p>
+                                                    
+                                                    <div class="mt-4 d-flex justify-content-between">
+                                                        <span class="badge bg-{% if feedback.status == 'pending' %}warning{% elif feedback.status == 'reviewed' %}info{% else %}success{% endif %}">
+                                                            Status: {{ feedback.status|title }}
+                                                        </span>
+                                                        
+                                                        {% if feedback.status != 'pending' and feedback.admin_response %}
+                                                            <span class="text-muted small">Responded on: {{ feedback.response_date|date:"M d, Y" }}</span>
+                                                        {% endif %}
+                                                    </div>
+                                                    
+                                                    {% if feedback.admin_response %}
+                                                        <div class="mt-3 p-3 bg-light rounded">
+                                                            <h6 class="text-primary">Response from Admin:</h6>
+                                                            <p class="mb-0">{{ feedback.admin_response }}</p>
+                                                        </div>
+                                                    {% endif %}
+                                                </div>
+                                                <div class="modal-footer">
+                                                    {% if feedback.status == 'pending' %}
+                                                        <a href="{% url 'feedback_update' feedback.pk %}" class="btn btn-primary">Edit Review</a>
+                                                    {% endif %}
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="card shadow">
+                            <div class="card-body text-center py-5">
+                                <i class="far fa-comment-dots fa-4x text-muted mb-3"></i>
+                                <h4>No Reviews Submitted Yet</h4>
+                                <p class="text-muted">You haven't submitted any reviews yet.</p>
+                                <a href="{% url 'feedback_create' %}" class="btn btn-primary mt-2">
+                                    <i class="fas fa-plus me-1"></i> Submit Review
+                                </a>
+                            </div>
+                        </div>
+                    {% endif %}
+                </section>
+            {% else %}
+                <div class="card mt-4">
+                    <div class="card-body text-center py-4">
+                        <h5>Want to share your experience?</h5>
+                        <a href="{% url 'login' %}" class="btn btn-primary mt-2">
+                            <i class="fas fa-sign-in-alt me-1"></i> Login to Submit Review
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+            
+            <div class="mt-4 text-center">
+                <a href="{% url 'home' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-1"></i> Back to Home
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

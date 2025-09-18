@@ -1,0 +1,312 @@
+{% extends 'hotels/header.html' %}
+{% block content %}
+
+<div class="container my-5">
+    <div class="row">
+        <!-- Profile Sidebar -->
+        <div class="col-md-4">
+            <div class="card shadow" data-aos="fade-right">
+                <div class="card-body text-center">
+                    {% if user.profile.profile_picture %}
+                        <img src="{{ user.profile.profile_picture.url }}" class="rounded-circle mb-3" width="150" height="150" alt="Profile Picture">
+                    {% else %}
+                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 150px; height: 150px;">
+                            <span class="display-4">{{ user.first_name|first }}</span>
+                        </div>
+                    {% endif %}
+                    
+                    <h3 class="mb-0">{{ user.profile.full_name }}</h3>
+                    <p class="text-muted">{{ user.email }}</p>
+                    
+                    <div class="d-grid gap-2 mt-3">
+                        <a href="{% url 'edit_profile' %}" class="btn btn-outline-primary">Edit Profile</a>
+                        <a href="{% url 'feedback_list' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-comment-dots me-1"></i> My Feedback
+                        </a>
+                    </div>
+                </div>
+                
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Account Status
+                        <span class="badge bg-{% if user.profile.account_status == 'active' %}success{% else %}danger{% endif %} rounded-pill">
+                            {{ user.profile.account_status|title }}
+                        </span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Email Verified
+                        <span class="badge bg-{% if user.profile.is_verified %}success{% else %}warning{% endif %} rounded-pill">
+                            {% if user.profile.is_verified %}Yes{% else %}No{% endif %}
+                        </span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Member Since
+                        <span>{{ user.date_joined|date:"M d, Y" }}</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Profile Details -->
+        <div class="col-md-8">
+            <div class="card shadow mb-4" data-aos="fade-left">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Personal Information</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <h6 class="text-muted">Full Name</h6>
+                            <p>{{ user.profile.full_name }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <h6 class="text-muted">Email</h6>
+                            <p>{{ user.email }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <h6 class="text-muted">Gender</h6>
+                            <p>{{ user.profile.get_gender_display }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <h6 class="text-muted">Date of Birth</h6>
+                            <p>{{ user.profile.date_of_birth|date:"F d, Y"|default:"Not specified" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card shadow mb-4" data-aos="fade-left" data-aos-delay="100">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Travel Preferences</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <h6 class="text-muted">Preferred Language</h6>
+                            <p>{{ user.profile.get_preferred_language_display }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <h6 class="text-muted">Travel Style</h6>
+                            <p>{{ user.profile.get_travel_preferences_display }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <h6 class="text-muted">Budget Range</h6>
+                            <p>{{ user.profile.get_budget_range_display }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Travel History Section -->
+            <div class="card shadow mb-4" id="bookings" data-aos="fade-left" data-aos-delay="150">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Travel History</h4>
+                </div>
+                <div class="card-body">
+                    {% if travel_history %}
+                        <div class="row">
+                            {% for booking in travel_history %}
+                                <div class="col-md-4 mb-3">
+                                    <div class="card travel-history-card">
+                                        <div class="position-relative">
+                                            {% if booking.image %}
+                                                <img src="{{ booking.image }}" class="card-img-top" alt="Hotel image" style="height: 160px; object-fit: cover;">
+                                            {% else %}
+                                                <div class="bg-light text-center py-5">
+                                                    <i class="fas fa-hotel fa-3x text-muted"></i>
+                                                </div>
+                                            {% endif %}
+                                            <div class="position-absolute bottom-0 start-0 w-100 p-2" style="background: rgba(0,0,0,0.7);">
+                                                <h6 class="text-light mb-0">{{ booking.place_name }}</h6>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <h6 class="card-title">{{ booking.hotel_name }}</h6>
+                                            <p class="card-text small text-muted">
+                                                <i class="fas fa-calendar-alt me-1"></i> {{ booking.booking_date }}
+                                            </p>
+                                            <button class="btn btn-sm btn-outline-primary booking-details-btn" data-bs-toggle="modal" data-bs-target="#bookingModal" data-booking-index="{{ forloop.counter0 }}">
+                                                <i class="fas fa-info-circle me-1"></i> View Details
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% elif travel_places %}
+                        <div class="row">
+                            {% for place in travel_places %}
+                                <div class="col-md-4 mb-3">
+                                    <div class="card bg-light">
+                                        <div class="card-body">
+                                            <p class="mb-0">{{ place }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-suitcase-rolling fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">Your travel history will appear here after you make hotel bookings.</p>
+                            <a href="{% url 'home' %}" class="btn btn-outline-primary mt-2">
+                                <i class="fas fa-search me-2"></i>Explore Destinations
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Recent Bookings -->
+            <div class="card shadow" data-aos="fade-left" data-aos-delay="200">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Recent Bookings</h4>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">No recent bookings found.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Booking Details Modal -->
+<div class="modal fade" id="bookingModal" tabindex="-1" aria-labelledby="bookingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="bookingModalLabel">Booking Details</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div id="modalImage" class="mb-3" style="height: 300px; background-size: cover; background-position: center; border-radius: 8px;"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <h4 id="modalHotelName" class="mb-3"></h4>
+                        <p class="mb-2"><i class="fas fa-map-marker-alt text-danger me-2"></i> <span id="modalPlaceName"></span></p>
+                        <p class="mb-2"><i class="fas fa-calendar-alt text-primary me-2"></i> <span id="modalBookingDate"></span></p>
+                        <p class="mb-2"><i class="fas fa-rupee-sign text-success me-2"></i> <span id="modalPrice"></span></p>
+                        
+                        <!-- Payment information section -->
+                        <div id="modalPaymentInfo" class="mb-4"></div>
+                        
+                        <a id="viewHotelLink" href="#" class="btn btn-primary">
+                            <i class="fas fa-hotel me-1"></i> View Hotel
+                        </a>
+                        
+                        <a id="viewDestinationLink" href="#" class="btn btn-outline-primary ms-2">
+                            <i class="fas fa-map-marked-alt me-1"></i> View Destination
+                        </a>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <div class="mt-3">
+                    <h5>Your Travel Memories</h5>
+                    <p class="text-muted">No memories added yet. Share your experience after your trip!</p>
+                    <button class="btn btn-sm btn-outline-primary disabled">
+                        <i class="fas fa-plus me-1"></i> Add Memory
+                    </button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript for handling modal data -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get all booking data directly from the page
+        var bookingsRaw = [
+            {% if travel_history %}
+                {% for booking in travel_history %}
+                    {
+                        hotel_id: "{{ booking.hotel_id }}",
+                        hotel_name: "{{ booking.hotel_name }}",
+                        place_id: "{{ booking.place_id }}",
+                        place_name: "{{ booking.place_name }}",
+                        image: "{{ booking.image }}",
+                        booking_date: "{{ booking.booking_date }}",
+                        price: "{{ booking.price }}",
+                        payment_id: "{{ booking.payment_id|default:'' }}",
+                        payment_status: "{{ booking.payment_status|default:'completed' }}"
+                    }{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            {% endif %}
+        ];
+        
+        console.log('Loaded bookings data:', bookingsRaw);
+        
+        // Add click event to detail buttons
+        var detailButtons = document.querySelectorAll('.booking-details-btn');
+        detailButtons.forEach(function(button) {
+            button.addEventListener('click', function() {
+                try {
+                    var index = parseInt(this.getAttribute('data-booking-index'));
+                    console.log('Opening booking at index:', index);
+                    
+                    if (!bookingsRaw[index]) {
+                        console.error('No booking found at index:', index);
+                        alert('Sorry, booking details are not available. Please try again later.');
+                        return;
+                    }
+                    
+                    var booking = bookingsRaw[index];
+                    console.log('Selected booking data:', booking);
+                    
+                    // Populate modal with booking details
+                    document.getElementById('modalHotelName').textContent = booking.hotel_name || 'N/A';
+                    document.getElementById('modalPlaceName').textContent = booking.place_name || 'N/A';
+                    document.getElementById('modalBookingDate').textContent = booking.booking_date || 'N/A';
+                    document.getElementById('modalPrice').textContent = '₹' + (booking.price || '0');
+                    
+                    // Payment info (if available)
+                    if (booking.payment_id) {
+                        document.getElementById('modalPaymentInfo').innerHTML = 
+                            '<p class="mb-2"><i class="fas fa-receipt text-info me-2"></i>Payment ID: <span class="text-muted">' + booking.payment_id + '</span></p>' +
+                            '<p class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Status: <span class="badge bg-success">Paid</span></p>';
+                    } else {
+                        document.getElementById('modalPaymentInfo').innerHTML = '';
+                    }
+                    
+                    // Set image
+                    if (booking.image) {
+                        document.getElementById('modalImage').style.backgroundImage = 'url(' + booking.image + ')';
+                        document.getElementById('modalImage').innerHTML = '';
+                    } else {
+                        document.getElementById('modalImage').style.backgroundImage = 'none';
+                        document.getElementById('modalImage').innerHTML = '<div class="d-flex justify-content-center align-items-center h-100 bg-light"><i class="fas fa-hotel fa-3x text-muted"></i></div>';
+                    }
+                    
+                    // Set links
+                    if (booking.hotel_id) {
+                        document.getElementById('viewHotelLink').href = '/hotel/' + booking.hotel_id + '/';
+                        document.getElementById('viewHotelLink').classList.remove('disabled');
+                    } else {
+                        document.getElementById('viewHotelLink').href = '#';
+                        document.getElementById('viewHotelLink').classList.add('disabled');
+                    }
+                    
+                    if (booking.place_id) {
+                        document.getElementById('viewDestinationLink').href = '/place/' + booking.place_id + '/';
+                        document.getElementById('viewDestinationLink').classList.remove('disabled');
+                    } else {
+                        document.getElementById('viewDestinationLink').href = '#';
+                        document.getElementById('viewDestinationLink').classList.add('disabled');
+                    }
+                } catch (error) {
+                    console.error('Error showing booking details:', error);
+                    alert('Sorry, an error occurred while displaying booking details.');
+                }
+            });
+        });
+    });
+</script>
+
+{% endblock %} 

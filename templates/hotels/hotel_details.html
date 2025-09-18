@@ -1,0 +1,115 @@
+{% extends 'hotels/base.html' %}
+
+{% block content %}
+
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <!-- Same Custom CSS as Home Page -->
+    <style>
+        /* Include all the custom styles from the home page here */
+        .navbar { /* ... */ }
+        .destination-card { /* ... */ }
+        /* ... other styles ... */
+        
+        .hotel-image {
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+        
+        .booking-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+
+<!-- Main Content -->
+<div class="container mt-5 pt-5">
+    <div class="row fade-in">
+        <div class="col-lg-8">
+            <h1 class="display-4 mb-4">{{ hotel.name }}</h1>
+            <div class="img-hover-zoom">
+                <img src="{{ hotel.image.url }}" alt="{{ hotel.name }}" class="img-fluid hotel-image">
+            </div>
+            <div class="mt-4">
+                <h3 class="mb-3">About the Hotel</h3>
+                <p class="lead">{{ hotel.description }}</p>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="booking-section sticky-top" style="z-index:1;top: 100px;">
+                <h3 class="mb-4">Booking Details</h3>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-map-marker-alt me-2"></i>Location</span>
+                        <span class="text-muted">{{ hotel.location }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-rupee-sign me-2"></i>Price per night</span>
+                        <span class="text-primary fw-bold">₹{{ hotel.price }}</span>
+                    </li>
+                </ul>
+                
+                <button id="checkout-button" class="btn btn-primary btn-lg w-100 mt-4">
+                    <i class="fas fa-credit-card me-2"></i>Book Now
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Same JavaScript as home page
+    window.addEventListener('scroll', function() { /* ... */ });
+    document.addEventListener('DOMContentLoaded', function() { /* ... */ });
+
+    function onPaymentSuccess(payment_id, order_id, signature) {
+        // Payment was successful, submit to our payment success endpoint
+        document.getElementById('razorpay_payment_id').value = payment_id;
+        document.getElementById('razorpay_order_id').value = order_id;
+        document.getElementById('razorpay_signature').value = signature;
+        document.getElementById('payment-success-form').submit();
+    }
+    
+    document.getElementById('checkout-button').onclick = function() {
+        var options = {
+            "key": "{{ razorpay_key }}",
+            "amount": "{{ hotel.price|floatformat:2 }}" * 100,
+            "currency": "INR",
+            "name": "Travel Explorer",
+            "description": "Booking for {{ hotel.name }}",
+            "order_id": "{{ order_id }}",
+            "callback_url": "{% url 'payment_success' hotel.id %}",
+            "prefill": {
+                "name": "{{ request.user.full_name }}",
+                "email": "{{ request.user.email }}"
+            },
+            "theme": {
+                "color": "#3399cc"
+            },
+            "handler": function (response) {
+                onPaymentSuccess(
+                    response.razorpay_payment_id,
+                    response.razorpay_order_id,
+                    response.razorpay_signature
+                );
+            }
+        };
+        var rzp1 = new Razorpay(options);
+        rzp1.open();
+        return false;
+    };
+</script>
+
+<!-- Hidden form to submit payment success data -->
+<form id="payment-success-form" action="{% url 'payment_success' hotel.id %}" method="POST" style="display: none;">
+    {% csrf_token %}
+    <input type="hidden" name="razorpay_payment_id" id="razorpay_payment_id">
+    <input type="hidden" name="razorpay_order_id" id="razorpay_order_id">
+    <input type="hidden" name="razorpay_signature" id="razorpay_signature">
+</form>
+
+{% endblock %}

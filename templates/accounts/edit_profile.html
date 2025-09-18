@@ -1,0 +1,119 @@
+{% extends 'hotels/header.html' %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Edit Profile</h3>
+                </div>
+                <div class="card-body p-4">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{% if message.tags == 'success' %}success{% else %}danger{% endif %} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                    
+                    <form method="post" enctype="multipart/form-data" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="mb-4">
+                            <h4 class="mb-3">Personal Information</h4>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="{{ form.first_name.id_for_label }}" class="form-label">First Name</label>
+                                    {{ form.first_name }}
+                                    {% if form.first_name.errors %}
+                                        <div class="invalid-feedback d-block">{{ form.first_name.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="{{ form.last_name.id_for_label }}" class="form-label">Last Name</label>
+                                    {{ form.last_name }}
+                                    {% if form.last_name.errors %}
+                                        <div class="invalid-feedback d-block">{{ form.last_name.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="{{ form.gender.id_for_label }}" class="form-label">Gender</label>
+                                    {{ form.gender }}
+                                    {% if form.gender.errors %}
+                                        <div class="invalid-feedback d-block">{{ form.gender.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="{{ form.date_of_birth.id_for_label }}" class="form-label">Date of Birth</label>
+                                    {{ form.date_of_birth }}
+                                    {% if form.date_of_birth.errors %}
+                                        <div class="invalid-feedback d-block">{{ form.date_of_birth.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h4 class="mb-3">Travel Preferences</h4>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="{{ form.preferred_language.id_for_label }}" class="form-label">Preferred Language</label>
+                                    {{ form.preferred_language }}
+                                    {% if form.preferred_language.errors %}
+                                        <div class="invalid-feedback d-block">{{ form.preferred_language.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="{{ form.travel_preferences.id_for_label }}" class="form-label">Travel Style</label>
+                                    {{ form.travel_preferences }}
+                                    {% if form.travel_preferences.errors %}
+                                        <div class="invalid-feedback d-block">{{ form.travel_preferences.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="{{ form.budget_range.id_for_label }}" class="form-label">Budget Range</label>
+                                    {{ form.budget_range }}
+                                    {% if form.budget_range.errors %}
+                                        <div class="invalid-feedback d-block">{{ form.budget_range.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h4 class="mb-3">Profile Picture</h4>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    {% if user.profile.profile_picture %}
+                                        <div class="mb-3">
+                                            <img src="{{ user.profile.profile_picture.url }}" alt="Current Profile Picture" class="img-thumbnail" style="max-width: 150px;">
+                                            <p class="form-text">Current profile picture</p>
+                                        </div>
+                                    {% endif %}
+                                    <label for="{{ form.profile_picture.id_for_label }}" class="form-label">Upload New Picture</label>
+                                    {{ form.profile_picture }}
+                                    {% if form.profile_picture.errors %}
+                                        <div class="invalid-feedback d-block">{{ form.profile_picture.errors.0 }}</div>
+                                    {% endif %}
+                                    <div class="form-text">Leave empty to keep current picture.</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'profile' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-1"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i> Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

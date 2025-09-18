@@ -1,0 +1,480 @@
+{% extends 'hotels/base.html' %}
+
+{% block content %}
+<!-- Location Banner -->
+<div class="location-banner py-4 text-white">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-map-marker-alt fa-2x me-3 location-pulse"></i>
+                    <div>
+                        <h4 class="mb-0 location-text">Exploring from <span id="user-location">Loading your location...</span></h4>
+                        <p class="mb-0 mt-1 location-subtext">Discover nearby destinations tailored for you</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                <button id="refresh-location" class="btn btn-outline-light">
+                    <i class="fas fa-sync-alt me-2"></i>Update Location
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- AI Trip Planner Hero Section -->
+<div class="ai-trip-hero">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 hero-content" data-aos="fade-right">
+                <h1 class="hero-title mb-4">Plan Your Dream Trip with AI</h1>
+                <p class="hero-text mb-4">Our AI-powered trip planner creates personalized itineraries tailored to your preferences, travel style, and budget. Experience travel planning reimagined.</p>
+                <div class="hero-features mb-4">
+                    <div class="feature-item">
+                        <i class="fas fa-magic"></i>
+                        <span>Personalized Suggestions</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>Day-by-Day Planning</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-bolt"></i>
+                        <span>Instant Results</span>
+                    </div>
+                </div>
+                <a href="{% url 'trip' %}" class="btn btn-primary btn-lg trip-btn">
+                    <i class="fas fa-robot me-2"></i>Create My Trip Plan
+                    <div class="btn-shine"></div>
+                </a>
+            </div>
+            <div class="col-lg-6 d-none d-lg-block" data-aos="fade-left">
+                <div class="hero-animation">
+                    <div class="map-bg"></div>
+                    <div class="itinerary-card card-1">
+                        <div class="card-icon"><i class="fas fa-umbrella-beach"></i></div>
+                        <div class="card-text">Beach Day</div>
+                    </div>
+                    <div class="itinerary-card card-2">
+                        <div class="card-icon"><i class="fas fa-utensils"></i></div>
+                        <div class="card-text">Local Cuisine</div>
+                    </div>
+                    <div class="itinerary-card card-3">
+                        <div class="card-icon"><i class="fas fa-mountain"></i></div>
+                        <div class="card-text">Hiking</div>
+                    </div>
+                    <div class="floating-icon icon-1"><i class="fas fa-plane"></i></div>
+                    <div class="floating-icon icon-2"><i class="fas fa-hotel"></i></div>
+                    <div class="floating-icon icon-3"><i class="fas fa-camera"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="container mt-5 pt-3">
+    <h1 class="text-center mb-5 fade-in">Discover Amazing Destinations</h1>
+    
+    <div class="row g-4 mb-5">
+        {% for place in places %}
+        <div class="col-lg-4 col-md-6 fade-in mb-3">
+            <div class="destination-card h-100">
+                <div class="img-hover-zoom">
+                    <img src="{{ place.image.url }}" class="card-img-top" alt="{{ place.name }}">
+                </div>
+                <div class="card-body p-3">
+                    <h4 class="card-title">
+                        <a href="{% url 'place_details' place.id %}" class="text-decoration-none text-dark">
+                            {{ place.name }}
+                        </a>
+                    </h4>
+                    <p class="card-text text-muted">{{ place.description|truncatewords:20 }}</p>
+                    <a href="{% url 'place_details' place.id %}" class="btn btn-primary">
+                        Explore More <i class="fas fa-arrow-right ms-2"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    // Get user location
+    function getUserLocation() {
+        const locationElement = document.getElementById('user-location');
+        
+        if (navigator.geolocation) {
+            locationElement.innerHTML = 'Detecting your location...';
+            
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    // Convert coordinates to address using reverse geocoding
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    
+                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            // Extract city and country from the response
+                            const city = data.address.city || data.address.town || data.address.village || data.address.hamlet;
+                            const state = data.address.state;
+                            const country = data.address.country;
+                            
+                            let locationText = '';
+                            if (city) locationText += city;
+                            if (state && city) locationText += `, ${state}`;
+                            else if (state) locationText += state;
+                            if (country && (city || state)) locationText += `, ${country}`;
+                            else if (country) locationText += country;
+                            
+                            locationElement.textContent = locationText || 'Your Location';
+                            
+                            // Add animation to signify success
+                            locationElement.classList.add('location-found');
+                            setTimeout(() => locationElement.classList.remove('location-found'), 1500);
+                        })
+                        .catch(error => {
+                            locationElement.textContent = 'Somewhere Amazing';
+                            console.error('Error getting location name:', error);
+                        });
+                },
+                function(error) {
+                    locationElement.textContent = 'Somewhere Amazing';
+                    console.error('Error getting location:', error);
+                }
+            );
+        } else {
+            locationElement.textContent = 'Somewhere Amazing';
+        }
+    }
+    
+    // Sticky navbar
+    window.addEventListener('scroll', function() {
+        const navbar = document.querySelector('.navbar');
+        if (window.scrollY > 50) {
+            navbar.classList.add('sticky-nav');
+        } else {
+            navbar.classList.remove('sticky-nav');
+        }
+    });
+
+    // Initialize animations
+    document.addEventListener('DOMContentLoaded', function() {
+        const elements = document.querySelectorAll('.fade-in');
+        elements.forEach(el => el.style.opacity = '1');
+        
+        // Get user location when page loads
+        getUserLocation();
+        
+        // Set up refresh button
+        document.getElementById('refresh-location').addEventListener('click', getUserLocation);
+    });
+</script>
+
+<style>
+    .location-banner {
+        background: linear-gradient(135deg, #3498db, #1a5276);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .location-banner::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPjxkZWZzPjxwYXR0ZXJuIGlkPSJwYXR0ZXJuIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiIHBhdHRlcm5UcmFuc2Zvcm09InJvdGF0ZSgxMzUpIj48cmVjdCB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIGZpbGw9IiNmZmZmZmYwNSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3QgZmlsbD0ibm9uZSIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIvPjxyZWN0IGZpbGw9InVybCgjcGF0dGVybikiIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiLz48L3N2Zz4=');
+        opacity: 0.3;
+    }
+    
+    .location-pulse {
+        animation: pulse 2s infinite;
+    }
+    
+    .location-text {
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+    
+    .location-subtext {
+        opacity: 0.8;
+    }
+    
+    .location-found {
+        animation: highlight 1.5s ease;
+    }
+    
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+            opacity: 1;
+        }
+        50% {
+            transform: scale(1.1);
+            opacity: 0.8;
+        }
+        100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes highlight {
+        0% {
+            color: #ffffff;
+        }
+        50% {
+            color: #ffeb3b;
+        }
+        100% {
+            color: #ffffff;
+        }
+    }
+    
+    /* AI Trip Planner Hero Styles */
+    .ai-trip-hero {
+        background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+        padding: 80px 0;
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .ai-trip-hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1NiIgaGVpZ2h0PSIxMDAiPgo8cGF0aCBkPSJNMjggNjZMMCA1MEwwIDE2TDI4IDBMNTYgMTZMNTYgNTBMMjggNjZMMjggMTAwIiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmZmZmYwNSIgc3Ryb2tlLXdpZHRoPSIyIj48L3BhdGg+CjxwYXRoIGQ9Ik0yOCAwTDI4IDM0TDAgNTBMMCA4NEwyOCAxMDBMNTYgODRMNTYgNTBMMjggMzQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2ZmZmZmZjA1IiBzdHJva2Utd2lkdGg9IjIiPjwvcGF0aD4KPC9zdmc+');
+        opacity: 0.15;
+    }
+    
+    .hero-title {
+        font-size: 3.2rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        background: linear-gradient(to right, #ffffff, #c9d6ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .hero-text {
+        font-size: 1.2rem;
+        line-height: 1.7;
+        opacity: 0.9;
+        max-width: 500px;
+    }
+    
+    .hero-features {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-bottom: 30px;
+    }
+    
+    .feature-item {
+        background: rgba(255,255,255,0.15);
+        backdrop-filter: blur(5px);
+        padding: 8px 15px;
+        border-radius: 50px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+    
+    .feature-item:hover {
+        background: rgba(255,255,255,0.25);
+        transform: translateY(-3px);
+    }
+    
+    .feature-item i {
+        color: #ffeb3b;
+    }
+    
+    .trip-btn {
+        position: relative;
+        overflow: hidden;
+        padding: 15px 30px;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        background: linear-gradient(135deg, #ff7e5f, #feb47b);
+        border: none;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+        transition: all 0.3s ease;
+    }
+    
+    .trip-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        background: linear-gradient(135deg, #ff7e5f, #feb47b);
+    }
+    
+    .btn-shine {
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+            90deg,
+            rgba(255,255,255,0) 0%,
+            rgba(255,255,255,0.2) 50%,
+            rgba(255,255,255,0) 100%
+        );
+        animation: shine 3s infinite;
+    }
+    
+    @keyframes shine {
+        0% { left: -100%; }
+        20% { left: 100%; }
+        100% { left: 100%; }
+    }
+    
+    /* Hero Animation */
+    .hero-animation {
+        position: relative;
+        height: 400px;
+        width: 100%;
+    }
+    
+    .map-bg {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 300px;
+        height: 300px;
+        background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cGF0aCBmaWxsPSIjZmZmZmZmMjAiIGQ9Ik0yMDggMzUyYy0yLjQgMC00LjgtLjctNi44LTIuMUw2NiAyODAuN1Y0MzZjMCA2LjYgNS40IDEyIDEyaDM2MGM2LjYgMCAxMi01LjQgMTItMTJWMjg5LjlsLTEzMCA3NC4zLTkxLTQ0LjQtOCwzLjljLTIuMiAxLjEtNC41IDEuNi02LjkgMS42LTIuMSAwLTQuMy0uNS02LjItMS41TDkwLjUgMjY1LjlsLS41LjNWOTZjMC02LjYtNS40LTEyLTEyLTEySDEyYy02LjYgMC0xMiA1LjQtMTIgMTJ2MzUyYzAgNi42IDUuNCAxMiAxMiAxMmg1MmM2LjYgMCAxMi01LjQgMTItMTJWMzY0aDEzMnptMTgtODJjMi4xIDAgNC4zLjUgNi4yIDEuNWwxMDIuMSA1MGwxMjguNy03My42YzUuOS0zLjQgMTMuNCAxLjYgMTMuNCAxMC44djY4YzAgNC4xLTIuMyA3LjgtNS45IDkuN2wtMTI5LjQgNzRjLTUuOSAzLjQtMTMuNCAwLTEzLjQtN3YtNjMuNGwtTzg5LjctNDIuN2MtNS41LTIuNy0xMi4zLS41LTE1LjUgNS0yLjYgNC41LTEuMiAxMC4zIDMuMiAxMy4ybDExOC45IDU4Yy2uMSAzLjEgMTMuNCAwIDEzLjQtN3YtNTEuMnoiLz48L3N2Zz4=');
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+        opacity: 0.6;
+        animation: float 6s ease-in-out infinite;
+    }
+    
+    .itinerary-card {
+        position: absolute;
+        background: white;
+        border-radius: 10px;
+        padding: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        animation: float 5s ease-in-out infinite;
+    }
+    
+    .card-1 {
+        top: 100px;
+        left: 80px;
+        animation-delay: 0s;
+    }
+    
+    .card-2 {
+        top: 200px;
+        right: 80px;
+        animation-delay: 1s;
+    }
+    
+    .card-3 {
+        top: 300px;
+        left: 150px;
+        animation-delay: 2s;
+    }
+    
+    .card-icon {
+        background: #f0f4ff;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6a11cb;
+    }
+    
+    .card-text {
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .floating-icon {
+        position: absolute;
+        width: 30px;
+        height: 30px;
+        background: rgba(255,255,255,0.2);
+        backdrop-filter: blur(5px);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: float 4s ease-in-out infinite;
+    }
+    
+    .icon-1 {
+        top: 80px;
+        right: 100px;
+        animation-delay: 0.5s;
+    }
+    
+    .icon-2 {
+        top: 250px;
+        left: 60px;
+        animation-delay: 1.5s;
+    }
+    
+    .icon-3 {
+        bottom: 50px;
+        right: 150px;
+        animation-delay: 2.5s;
+    }
+    
+    @keyframes float {
+        0% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(-15px);
+        }
+        100% {
+            transform: translateY(0);
+        }
+    }
+    
+    @media (max-width: 992px) {
+        .hero-title {
+            font-size: 2.5rem;
+        }
+        
+        .ai-trip-hero {
+            padding: 60px 0;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .hero-title {
+            font-size: 2rem;
+        }
+        
+        .ai-trip-hero {
+            padding: 40px 0;
+        }
+        
+        .hero-features {
+            flex-direction: column;
+            gap: 10px;
+        }
+    }
+</style>
+{% endblock %}

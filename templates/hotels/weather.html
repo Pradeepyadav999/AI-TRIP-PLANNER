@@ -1,0 +1,118 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Weather Info By 24News+ </title>
+    <link rel="icon" href="{% static 'images/snow.png' %}" />
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+  </head>
+  <body>
+    <div class="Weather">
+      <input
+        type="search"
+        list="suggestions"
+        class="weather__search"
+        placeholder="    Enter Your City ... "
+      />
+      <datalist id="suggestions">
+        <option value="Pune"> </option>
+        <option value="Mumbai"> </option>
+        <option value="Delhi"> </option> >
+      </datalist>
+
+      <div class="weather__today">
+        <div class="weather__details">
+          <h2 class="weaher__city">City</h2>
+          <p class="weather__day">Day </p>
+          <p class="weather__calendar">10/24/2021</p>
+          <div class="weather__current">
+            <p class="weader__indicatoer weader__indicatoer--humiditiy">Humidity :
+              <span class="humiditiy-value">50</span>%
+            </p>
+            <p class="weader__indicatoer weader__indicatoer--wind">Wind :
+              <span class="wind-value">West, 5</span> m/s
+            </p>
+            <p class="weader__indicatoer weader__indicatoer--pressure">HectoPascals :
+              <span class="pressure-value">1050</span> hPa 
+            </p>
+          </div>
+        </div>
+        <img
+          src="{% static 'images/snow.png' %}"
+          alt="weather-image"
+          class="weather__image"
+        />
+        <div class="weather__temperature">
+          <span class="temperature-value">+25</span> &deg;C
+        </div>
+      </div>
+
+      <div class="weather__forecast">
+        <article class="weather__forecast__item">
+          <img
+            src="{% static 'images/snow.png' %}"
+            alt="weather-forecast"
+            class="weather__forecast__icon"
+          />
+          <h3 class="weather__forecast__day">Day</h3>
+          <p class="weather_forecast__temperature">
+            <span class="value">+25</span> &deg;C
+          </p>
+        </article>
+
+        <article class="weather__forecast__item">
+          <img
+            src="{% static 'images/thunderstorm.png' %}"
+            alt="weather-forecast"
+            class="weather__forecast__icon"
+          />
+          <h3 class="weather__forecast__day">Day</h3>
+          <p class="weather_forecast__temperature">
+            <span class="value">+25</span> &deg;C
+          </p>
+        </article>
+
+        <article class="weather__forecast__item">
+          <img
+            src="{% static 'images/wind.png' %}"
+            alt="weather-forecast"
+            class="weather__forecast__icon"
+          />
+          <h3 class="weather__forecast__day">Day</h3>
+          <p class="weather_forecast__temperature">
+            <span class="value">+25</span> &deg;C
+          </p>
+        </article>
+
+        <article class="weather__forecast__item">
+          <img
+            src="{% static 'images/snow.png' %}"
+            alt="weather-forecast"
+            class="weather__forecast__icon"
+          />
+          <h3 class="weather__forecast__day">Day</h3>
+          <p class="weather_forecast__temperature">
+            <span class="value">+25</span> &deg;C
+          </p>
+        </article>
+
+        <article class="weather__forecast__item">
+          <img
+            src="{% static 'images/thunderstorm.png' %}"
+            alt="weather-forecast" 
+            class="weather__forecast__icon"
+          />
+          <h3 class="weather__forecast__day">Day</h3>
+          <p class="weather_forecast__temperature">
+            <span class="value">+25</span> &deg;C
+          </p>
+        </article>
+      </div>
+    </div>
+
+    <script src="{% static 'js/weather.js' %}"></script>
+  </body>
+</html>

@@ -1,0 +1,167 @@
+{% extends 'hotels/base.html' %}
+
+
+
+{% block content %}
+
+
+
+    <style>
+        /* Custom styles */
+        .navbar {
+            background-color: #3a86ff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .navbar-brand, .nav-link {
+            color: white !important;
+        }
+        
+        .hero-section {
+            background-color: #f8f9fa;
+            padding: 2rem 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .place-img {
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+            max-width: 100%;
+            height: auto;
+        }
+        
+        .place-img:hover {
+            transform: scale(1.02);
+        }
+        
+        .description-card {
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s;
+            background-color: white;
+        }
+        
+        .description-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .map-container {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .cta-button {
+            transition: all 0.3s;
+            padding: 10px 20px;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            background-color: #ff5a5f;
+            border: none;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            background-color: #ff4146;
+        }
+        
+        footer {
+            background-color: #3a86ff;
+            color: white;
+            padding: 1.5rem 0;
+            margin-top: 3rem;
+        }
+        
+        .page-section {
+            padding: 2rem 0;
+        }
+        
+        .section-title {
+            position: relative;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .section-title:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background-color: #ff5a5f;
+        }
+    </style>
+</head>
+
+
+
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-12 text-center">
+                    <h1 class="display-4 fw-bold mb-3" data-aos="fade-up">{{ place.name }}</h1>
+                    <nav aria-label="breadcrumb" data-aos="fade-up" data-aos-delay="100">
+                        <ol class="breadcrumb justify-content-center">
+                            <li class="breadcrumb-item"><a href="#">Home</a></li>
+                            <li class="breadcrumb-item"><a href="#">Destinations</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">{{ place.name }}</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container page-section">
+        <div class="row g-4">
+            <!-- Place Image Column -->
+            <div class="col-lg-6" data-aos="fade-right">
+                <img src="{{ place.image.url }}" alt="{{ place.name }}" class="place-img img-fluid">
+            </div>
+            
+            <!-- Place Description Column -->
+            <div class="col-lg-6" data-aos="fade-left">
+                <div class="card description-card h-100">
+                    <div class="card-body">
+                        <h2 class="section-title">About {{ place.name }}</h2>
+                        <p class="lead">{{ place.description }}</p>
+                        <div class="d-grid gap-2 mt-4">
+                            <a href="{% url 'hotels_near_place' place.id %}" class="btn btn-primary cta-button">
+                                <i class="fas fa-hotel me-2"></i>Show Hotels Near This Place
+                            </a>
+                            <a href="{% url 'transportation_near_place' place.id %}" class="btn btn-success cta-button">
+                                <i class="fas fa-bus me-2"></i>Show Transportation Options
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Location Section -->
+    <div class="container page-section">
+        <h2 class="section-title" data-aos="fade-up">Location</h2>
+        <div class="map-container" data-aos="fade-up" data-aos-delay="100">
+            {{ map_html|safe }}
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <script>
+        // Initialize AOS animations
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true
+        });
+    </script>
+
+
+
+    {% endblock %}

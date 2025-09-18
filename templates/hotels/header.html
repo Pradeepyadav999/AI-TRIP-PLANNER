@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Travel Destinations</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- AOS Animation Library -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
+    <style>
+       
+
+        
+        .destination-card {
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: none;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .destination-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .img-hover-zoom {
+            overflow: hidden;
+        }
+
+        .img-hover-zoom img {
+            transition: transform 0.3s;
+        }
+
+        .img-hover-zoom:hover img {
+            transform: scale(1.1);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.8s ease-out;
+        }
+
+
+
+
+    </style>
+</head>
+
+<body>
+    <!-- Navigation Bar -->
+   <!-- Navigation Bar -->
+<nav class="navbar navbar-expand-lg sticky-top">
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'home' %}">
+            <i class="fas fa-globe-americas me-2 fa-spin-hover"></i>Travel Explorer
+        </a>
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="fas fa-bars text-light"></i>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link hover-underline-animation" href="{% url 'home' %}">
+                        <i class="fas fa-home me-1"></i> Home
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link hover-underline-animation" href="{% url 'trip' %}">
+                        <i class="fas fa-heart me-1"></i> Trip
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link hover-underline-animation" href="{% url 'about' %}">
+                        <i class="fas fa-info-circle me-1"></i> About Us
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link hover-underline-animation" href="{% url 'contact' %}">
+                        <i class="fas fa-phone me-1"></i> Contact
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link hover-underline-animation" href="{% url 'feedback_list' %}">
+                        <i class="fas fa-comment-dots me-1"></i> Feedback
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link hover-underline-animation" href="{% url 'weather' %}">
+                        <i class="fas fa-cloud-sun me-1"></i> Weather
+                    </a>
+                </li>
+                
+                {% if user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-circle me-1"></i> {{ user.profile.full_name|default:user.username }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="{% url 'profile' %}"><i class="fas fa-id-card me-2"></i>My Profile</a></li>
+                            <li><a class="dropdown-item" href="{% url 'profile' %}#bookings"><i class="fas fa-history me-2"></i>My Bookings</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form method="post" action="/accounts/logout/">
+                                    {% csrf_token %}
+                                    <button type="submit" class="dropdown-item">
+                                        <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
+                {% else %}
+                    <li class="nav-item ms-2">
+                        <a class="btn btn-light rounded-pill px-3 nav-btn" href="{% url 'login' %}">
+                            <i class="fas fa-sign-in-alt me-1"></i> Login
+                        </a>
+                    </li>
+                    <li class="nav-item ms-2">
+                        <a class="btn btn-outline-light rounded-pill px-3 nav-btn" style="color: rgb(0, 0, 0);" href="{% url 'register' %}">
+                            <i class="fas fa-user-plus me-1"></i> Register
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Add these styles to your existing CSS -->
+<style>
+    /* Enhanced navbar styles */
+    .navbar {
+        background: linear-gradient(135deg, #3a86ff 0%, #2667ca 100%);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        padding: 15px 0;
+    }
+    
+    .navbar-brand {
+        font-weight: 700;
+        font-size: 1.5rem;
+        letter-spacing: 0.5px;
+    }
+    
+    .fa-globe-americas {
+        color: #ffdb58;
+        transition: all 0.3s ease;
+    }
+    
+    .fa-spin-hover:hover {
+        animation: fa-spin 2s infinite linear;
+    }
+    
+    .nav-link {
+        font-weight: 500;
+        padding: 8px 15px !important;
+        margin: 0 5px;
+        position: relative;
+        transition: all 0.3s ease;
+    }
+    
+    .hover-underline-animation {
+        display: inline-block;
+        position: relative;
+    }
+    
+    .hover-underline-animation::after {
+        content: '';
+        position: absolute;
+        width: 0;
+        height: 2px;
+        bottom: 0;
+        left: 0;
+        background-color: white;
+        transition: width 0.3s;
+    }
+    
+    .hover-underline-animation:hover::after {
+        width: 100%;
+    }
+    
+    .nav-btn {
+        color: #3a86ff;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .nav-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        color: #2667ca;
+    }
+    
+    @keyframes fa-spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>
+
+{% block content %}{% endblock %}
+
+<!-- Bootstrap JS Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- AOS Animation Library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+<script>
+    // Initialize AOS animation
+    AOS.init({
+        duration: 800,
+        once: true
+    });
+</script>
+</body>
+</html>
